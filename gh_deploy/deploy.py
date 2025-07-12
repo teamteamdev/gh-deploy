@@ -29,7 +29,7 @@ def clone_url(project: Project) -> str:
             f"https://{settings.username}:{settings.password}@github.com/{project.repo}"
         )
 
-    return f"git@gitub.com:{project.repo}"
+    return f"git@github.com:{project.repo}"
 
 
 def deploy(project: Project, *, use_lfs: bool, default_timeout: int) -> None:
