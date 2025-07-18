@@ -1,0 +1,25 @@
+# Server configuration
+# bind = "127.0.0.1" # Default is "::" (all IPv4 and IPv6 interfaces)"
+port = 8080          # Required
+
+# Enable Git LFS support
+# git_lfs = true
+
+# Optional: TLS configuration
+# [tls]
+# cert_file = "/path/to/cert.pem" # TLS certificate file
+# key_file = "/path/to/key.pem" # TLS private key file
+
+# GitHub App configuration
+[github_app]
+client_id = "123456"                                     # GitHub App client ID
+private_key_file = "/path/to/github-app-private-key.pem" # GitHub App private key file
+webhook_secret_file = "/path/to/webhook-secret"          # File with webhook secret
+
+# Repository definitions
+[[repos]]
+full_name = "owner/repo"
+branch = "main"              # Branch to watch for changes
+clone_path = "/var/www/repo" # This folder should be writable by user running the gh-deploy
+command = "make deploy"      # Optional: command to run after update
+timeout = 300                # in seconds, default is 120
