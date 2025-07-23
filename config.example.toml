@@ -1,6 +1,10 @@
 # Server configuration
-# bind = "127.0.0.1" # Default is "::" (all IPv4 and IPv6 interfaces)"
-port = 8080          # Required
+bind = "[::1]:8080" # Required
+# Examples:
+# "[::]:80" - listen on port 80 on all IPv4/IPv6 addresses
+# "[::1]:80" - listen on port 80 on localhost
+# "192.168.1.1:12345" - listen on port 12345 on a specific IPv4 address
+# "unix:/run/gh-deploy/http.sock" - listen on a Unix socket
 
 # Enable Git LFS support
 # git_lfs = true
@@ -12,14 +16,14 @@ port = 8080          # Required
 
 # GitHub App configuration
 [github_app]
-client_id = "123456"                                     # GitHub App client ID
-private_key_file = "/path/to/github-app-private-key.pem" # GitHub App private key file
-webhook_secret_file = "/path/to/webhook-secret"          # File with webhook secret
+client_id = "123456abcdefGHIJKLMN"                    # GitHub App client ID
+private_key_file = "/etc/gh-deploy/key.pem"           # GitHub App private key file
+webhook_secret_file = "/etc/gh-deploy/webhook-secret" # File with webhook secret
 
-# Repository definitions
-[[repos]]
-full_name = "owner/repo"
-branch = "main"              # Branch to watch for changes
-clone_path = "/var/www/repo" # This folder should be writable by user running the gh-deploy
-command = "make deploy"      # Optional: command to run after update
-timeout = 300                # in seconds, default is 120
+# Repositories and branches to deploy
+[[projects]]
+repository = "owner/repo"
+branch = "main"           # Branch to watch for changes
+path = "/var/www/repo"    # This folder should be writable by user running the gh-deploy
+command = "make deploy"   # Optional: command to run after update
+timeout = 300             # in seconds, default is 120

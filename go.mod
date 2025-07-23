@@ -14,6 +14,9 @@ require (
 require (
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/kofalt/go-memoize v0.0.0-20240506050413-9e5eb99a0f2a // indirect
+	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
+	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 )
