@@ -28,15 +28,21 @@ jobs:
     - name: Download dependencies
       run: go mod download
 
-    - name: Build binaries
+    - name: Build and package archives
       run: |
-        GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -trimpath -o gh-deploy-linux-amd64 .
-        GOOS=linux GOARCH=arm64 go build -ldflags="-w -s" -trimpath -o gh-deploy-linux-arm64 .
+        for arch in amd64 arm64; do
+          GOOS=linux GOARCH=$arch go build -ldflags="-w -s" -trimpath -o gh-deploy .
+          tar -czf gh-deploy-linux-$arch.tar.gz \
+            -C "$PWD" gh-deploy \
+            -C "$PWD/systemd" gh-deploy.conf
+          rm gh-deploy
+        done
+
     - name: Upload release assets
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          gh-deploy-linux-amd64
-          gh-deploy-linux-arm64
+          gh-deploy-linux-amd64.tar.gz
+          gh-deploy-linux-arm64.tar.gz
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

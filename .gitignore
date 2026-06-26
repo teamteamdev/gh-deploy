@@ -16,10 +16,13 @@ go.work
 
 # Build artifacts
 /gh-deploy
+/gh-deploy-linux-*
+*.tar.gz
 
 # Configuration files with secrets
 config.toml
 *.pem
+webhook-secret
 .env
 
 # IDE files
