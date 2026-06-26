@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -33,25 +34,45 @@ func newSetupCmd() *cobra.Command {
 	opts := &setupOptions{}
 
 	cmd := &cobra.Command{
-		Use:   "setup",
 		Short: "Register a GitHub App and generate the configuration",
-		Long: "Launches a one-shot web server that walks you through GitHub's App " +
-			"Manifest flow, then writes config.toml, key.pem and webhook-secret.",
+		Long: `This command guides you through the setup of GitHub App and generates the
+configuration files.
+
+To proceed, you will need to make this app publicly available: GitHub will
+trigger a webhook whenever a push is made to a repository in your personal
+account or organization. You can directly open a port on your server or use
+reverse proxy. ”--public-url” must be set to a publicly accessible URL that
+GitHub will call.
+
+It's recommended to use TLS for incoming connections. If you don’t use a reverse
+proxy, you may pass your TLS certificate with “--tls-cert” and “--tls-key”.
+
+By default, this tool will set up deployments from your personal account. If you
+need to deploy organization-owned repositories, provide its name using
+“--github-org” parameter.
+
+You can change default configuration path (“/etc/gh-deploy”) by “--config” flag.
+This tool will store GitHub App private key and webhook secret there. The tool
+must be able to write into that directory. Read permissions will be provided
+for group “gh-deploy” or other group specified by “--config-chgrp”. To ensure
+proper permission, we suggest you run this command with sudo.
+		`,
 		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runSetup(opts)
 		},
+		Use: "setup --bind address --public-url https://example.com/ [flags]",
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&opts.bind, "bind", "", "address to listen on, e.g. [::]:8443 (required)")
+	flags.StringVar(&opts.bind, "bind", "", "(required) address to listen on, e.g. [::]:8443 or unix:/run/gh-deploy.sock")
 	flags.StringVar(&opts.tlsCert, "tls-cert", "", "path to TLS certificate file")
 	flags.StringVar(&opts.tlsKey, "tls-key", "", "path to TLS private key file")
-	flags.StringVar(&opts.publicURL, "public-url", "", "public https:// URL of this server (required)")
+	flags.StringVar(&opts.publicURL, "public-url", "", "(required) public URL of this server")
 	flags.StringVar(&opts.githubOrg, "github-org", "", "create the app under this organization instead of your account")
 	flags.StringVar(&opts.configDir, "config", "/etc/gh-deploy", "directory to write configuration into")
-	flags.StringVar(&opts.configChgrp, "config-chgrp", "gh-deploy", "group to assign to the generated files")
+	flags.StringVar(&opts.configChgrp, "config-chgrp", "gh-deploy", "group that accesses configuration files and secrets")
 
 	cmd.MarkFlagRequired("bind")
 	cmd.MarkFlagRequired("public-url")
@@ -62,8 +83,12 @@ func newSetupCmd() *cobra.Command {
 func runSetup(opts *setupOptions) error {
 	opts.publicURL = strings.TrimRight(opts.publicURL, "/")
 
-	if !strings.HasPrefix(opts.publicURL, "https://") {
-		return fmt.Errorf("--public-url must be an https:// URL")
+	u, err := url.Parse(opts.publicURL)
+	if err != nil {
+		return fmt.Errorf("--public-url is not a valid URL: %w", err)
+	}
+	if (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return fmt.Errorf("--public-url is not a valid URL")
 	}
 
 	if (opts.tlsCert == "") != (opts.tlsKey == "") {

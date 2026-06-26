@@ -16,7 +16,7 @@ func init() {
 func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "gh-deploy <config.toml>",
-		Short: "GitHub webhook deployment server",
+		Short: "GitHub webhook handler for secure repository deployment.",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configPath = args[0]

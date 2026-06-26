@@ -34,7 +34,7 @@ jobs:
           GOOS=linux GOARCH=$arch go build -ldflags="-w -s" -trimpath -o gh-deploy .
           tar -czf gh-deploy-linux-$arch.tar.gz \
             -C "$PWD" gh-deploy \
-            -C "$PWD/systemd" gh-deploy.conf
+            -C "$PWD/systemd" gh-deploy.service
           rm gh-deploy
         done
 
