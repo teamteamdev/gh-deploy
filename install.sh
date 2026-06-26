@@ -57,7 +57,7 @@ echo "Installing binary to ${BIN_DIR}/gh-deploy..."
 install -m 0755 "$TMP/gh-deploy" "${BIN_DIR}/gh-deploy"
 
 echo "Installing systemd unit to ${UNIT_PATH}..."
-install -m 0644 "$TMP/gh-deploy.conf" "$UNIT_PATH"
+install -m 0644 "$TMP/gh-deploy.service" "$UNIT_PATH"
 
 echo "Creating configuration directory ${CONFIG_DIR}..."
 mkdir -p "$CONFIG_DIR"
@@ -70,12 +70,10 @@ cat <<EOF
 
 gh-deploy installed successfully.
 
-Next, register a GitHub App and generate the configuration:
+To register a GitHub App and generate the configuration, run:
 
-  sudo gh-deploy setup --bind '[::]:8443' --public-url https://your-host.example.com \\
-      --tls-cert /path/to/cert.pem --tls-key /path/to/key.pem
+  sudo gh-deploy setup --bind '<bind-address>' --public-url '<your-public-url>'
 
-Then start the service:
+Run “gh-deploy setup --help” for all options and more information.
 
-  sudo systemctl enable --now gh-deploy
 EOF
