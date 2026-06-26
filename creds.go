@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,7 +19,8 @@ var (
 	)
 )
 
-func fetchAccessToken(installationID int64) (string, error) {
+// appJWT mints a short-lived JWT that authenticates as the GitHub App itself.
+func appJWT() (string, error) {
 	now := time.Now()
 	claims := jwt.MapClaims{
 		"iat": now.Unix(),
@@ -30,6 +32,15 @@ func fetchAccessToken(installationID int64) (string, error) {
 	tokenString, err := token.SignedString(config.GitHubApp.privateKey)
 	if err != nil {
 		return "", fmt.Errorf("failed to sign JWT: %w", err)
+	}
+
+	return tokenString, nil
+}
+
+func fetchAccessToken(installationID int64) (string, error) {
+	tokenString, err := appJWT()
+	if err != nil {
+		return "", err
 	}
 
 	client := github.NewClient(nil).WithAuthToken(tokenString)
@@ -53,4 +64,29 @@ func getAccessToken(installationID int64) (string, error) {
 
 	token, err, _ := memoize.Call(tokenCache, fmt.Sprintf("fetch-access-token-%d", installationID), fetch)
 	return token, err
+}
+
+// getRepositoryToken resolves the App installation that owns the given
+// "owner/repo" repository and returns an access token for it. This is used by
+// the manual fetch command, which has no webhook payload to read the
+// installation ID from.
+func getRepositoryToken(repository string) (string, error) {
+	owner, repo, found := strings.Cut(repository, "/")
+	if !found {
+		return "", fmt.Errorf("invalid repository name %q, expected \"owner/repo\"", repository)
+	}
+
+	tokenString, err := appJWT()
+	if err != nil {
+		return "", err
+	}
+
+	client := github.NewClient(nil).WithAuthToken(tokenString)
+
+	installation, _, err := client.Apps.FindRepositoryInstallation(context.Background(), owner, repo)
+	if err != nil {
+		return "", fmt.Errorf("failed to find installation for %s: %w", repository, err)
+	}
+
+	return getAccessToken(installation.GetID())
 }
