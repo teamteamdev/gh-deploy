@@ -160,10 +160,10 @@
             };
 
             path =
-              [self.packages.${pkgs.system}.gh-deploy pkgs.git]
+              [self.packages.${pkgs.stdenv.hostPlatform.system}.gh-deploy pkgs.git]
               ++ lib.optional cfg.gitLfs pkgs.git-lfs;
             script = ''
-              exec ${self.packages.${pkgs.system}.gh-deploy}/bin/gh-deploy /etc/gh-deploy/config.toml
+              exec gh-deploy /etc/gh-deploy/config.toml
             '';
           };
 
