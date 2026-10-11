@@ -20,7 +20,7 @@
             pname = "gh-deploy";
             version = "0.1.0";
             src = ./.;
-            vendorHash = "sha256-C6v/2VamvK2C/YPqtNLq91v0hkCge8akOaKp/Yy2TpM=";
+            vendorHash = "sha256-h2KH7oxiPvaltuMCAzeJH3/JAiOjTwv6nLZ4U1+xCgc=";
           };
           default = gh-deploy;
         };
